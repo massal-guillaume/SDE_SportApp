@@ -1,9 +1,7 @@
 package SportRecap.service;
 
-import SportRecap.model.Exercice;
-import SportRecap.model.User;
-import SportRecap.model.UserModel;
-import SportRecap.model.VerificationToken;
+import SportRecap.model.*;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
@@ -20,16 +18,30 @@ public interface AccountService {
     User findUserbyEmail(String email) throws SQLException;
 
     List<User> listUsers() throws SQLException;
+
+    VerificationToken createVerifToken(User user) throws SQLException;
+
+    Boolean verifyVerificationToken(String token) throws SQLException;
+
+    VerificationToken getVerifTokenfromUser(long id) throws SQLException;
+
+    void deleteVerifToken(VerificationToken token) throws SQLException;
+
+    public void changepassword(String password,User user) throws SQLException;
+    public String generateRandomPassword();
+
+    PasswordToken createPasswordToken(User user) throws SQLException;
+
+    User findUserbyPasswordToken(String token) throws SQLException;
+
+    void deletePasswordToken(String token) throws SQLException;
+
+
+    User usernamefromrequest(HttpServletRequest request) throws SQLException;
+
 /*
-    String usernamefromrequest(HttpServletRequest request);
-
-    void saveVerifToken(String token, User user);
-
     Boolean verifyVerificationToken(String token);
 
-    VerificationToken getTokenfromUser(User user);
-
-    void deleteToken(VerificationToken token);
 
     String createPasswordToken(User user);
 

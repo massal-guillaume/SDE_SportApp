@@ -1,25 +1,28 @@
 package SportRecap.model;
 
 import SportRecap.security.JWTUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
+@Getter
+@Setter
 public class VerificationToken {
 
-
-    private long id;
+    private long idUser;
 
     private String token;
 
     private Date expirationTime;
 
-    private User user;
 
-    public VerificationToken(String token, User user) {
+    public VerificationToken(User user) {
         super();
-        this.token = token;
-        this.user = user;
+        this.token = UUID.randomUUID().toString();
+        this.idUser = user.getId();
         this.expirationTime= expidate(JWTUtil.EXPIRATION_REGISTER_TOKEN);
     }
 
@@ -27,6 +30,12 @@ public class VerificationToken {
         super();
         this.token = token;
         this.expirationTime= expidate(JWTUtil.EXPIRATION_REGISTER_TOKEN);
+    }
+
+    public VerificationToken(long idUser,String token,Date expirationTime) {
+        this.token = token;
+        this.expirationTime = expirationTime;
+        this.idUser = idUser;
     }
 
     private Date expidate(int expirationTime){

@@ -21,9 +21,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/refreshtoken")) {
-            filterChain.doFilter(request, response);
-        } else {
             String authtoken = request.getHeader(JWTUtil.AUTH_HEADER);
             if (authtoken != null && authtoken.startsWith(JWTUtil.PREFIX)) {
                 try {
@@ -37,7 +34,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                     filterChain.doFilter(request, response);
                 } catch (Exception e) {
-
                     response.setHeader("error-message", e.getMessage());
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 }
@@ -45,5 +41,4 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
         }
-    }
 }

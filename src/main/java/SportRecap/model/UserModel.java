@@ -11,5 +11,9 @@ public class UserModel {
     private String username;
     private String password;
 
-
+    public UserModel(String email, String username, String password) {
+        this.email = email;
+        this.username = username;
+        this.password = password;
+    }
 }

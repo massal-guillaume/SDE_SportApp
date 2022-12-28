@@ -1,6 +1,7 @@
 package SportRecap.service.impl;
 
 import SportRecap.DAO.AccountRepository;
+import SportRecap.DAO.PasswordTokenRepository;
 import SportRecap.DAO.VerifTokenRepository;
 import SportRecap.model.*;
 import SportRecap.security.JWTUtil;
@@ -25,11 +26,14 @@ public class AccountServiceImpl implements AccountService {
     private PasswordEncoder passwordEncoder;
     private AccountRepository accountRepository;
 
+    private PasswordTokenRepository passwordTokenRepository;
+
     @Autowired
-    public AccountServiceImpl(VerifTokenRepository verifTokenRepository, PasswordEncoder passwordEncoder, AccountRepository accountRepository) {
+    public AccountServiceImpl(VerifTokenRepository verifTokenRepository, PasswordEncoder passwordEncoder, AccountRepository accountRepository,PasswordTokenRepository passwordTokenRepository) {
         this.accountRepository = accountRepository;
         this.verifTokenRepository = verifTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.passwordTokenRepository= passwordTokenRepository;
     }
 
 
@@ -43,14 +47,14 @@ public class AccountServiceImpl implements AccountService {
                     user.setEmail(userModel.getEmail());
                     String password = userModel.getPassword();
                     user.setPassword(passwordEncoder.encode(password));
-                    this.accountRepository.save(user);
-                    return user;
+                    User userSaved = this.accountRepository.save(user);
+                    return userSaved;
                 } catch (Exception e) {
                     throw e;
                 }
             }
         }
-        return user;
+        return null;
     }
 
     @Override
@@ -68,38 +72,18 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findAll();
     }
 
-    /*
     @Override
-    public String usernamefromrequest(HttpServletRequest request) {
-        try {
-
-            String authtoken = request.getHeader(JWTUtil.AUTH_HEADER);
-            String token = authtoken.substring(JWTUtil.PREFIX.length());
-            Algorithm algorithm = Algorithm.HMAC256(JWTUtil.SECRET);
-            JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-            DecodedJWT decodedJWT = jwtVerifier.verify(token);
-            String username = decodedJWT.getSubject();
-            return username;
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-     */
-/*
-    @Override
-    public void saveVerifToken(String token, User user) {
-        VerificationToken veriftoken = new VerificationToken(token,user);
+    public VerificationToken createVerifToken(User user) throws SQLException {
+        VerificationToken veriftoken = new VerificationToken(user);
         this.verifTokenRepository.save(veriftoken);
-
+        return veriftoken;
     }
 
     @Override
-    public Boolean verifyVerificationToken(String token) {
+    public Boolean verifyVerificationToken(String token) throws SQLException {
         VerificationToken verificationToken = verifTokenRepository.findByToken(token);
         if(verificationToken == null) return false;
-
-        User user = verificationToken.getUser();
+        User user = finUserbyId(verificationToken.getIdUser());
         Calendar cal = Calendar.getInstance();
         if(verificationToken.getExpirationTime().getTime()-cal.getTime().getTime() <=0){
             this.verifTokenRepository.delete(verificationToken);
@@ -107,18 +91,72 @@ public class AccountServiceImpl implements AccountService {
         }
         if(user.isAccountactivated()==true) return false;
         user.setAccountactivated(true);
-        userRepository.save(user);
+        accountRepository.update(user);
+        this.verifTokenRepository.delete(verificationToken);
         return true;
-
     }
 
-    @Override
-    public VerificationToken getTokenfromUser(User user) {
+    private User finUserbyId(long idUser) throws SQLException {
+        return this.accountRepository.findById(idUser);
 
-        VerificationToken token = this.verifTokenRepository.findByUser(user);
+    }
+    @Override
+    public VerificationToken getVerifTokenfromUser(long id) throws SQLException {
+        VerificationToken token = this.verifTokenRepository.getVerifTokenById(id);
         if(token == null) return null;
         else return token;
     }
+
+    public void deleteVerifToken(VerificationToken verificationToken) throws SQLException {
+        this.verifTokenRepository.delete(verificationToken);
+
+    }
+
+    public void changepassword(String password,User user) throws SQLException{
+        this.accountRepository.changepassword(passwordEncoder.encode(password),user);
+    }
+
+    public String generateRandomPassword(){
+        String password = UUID.randomUUID().toString();
+        return password;
+    }
+
+    @Override
+    public PasswordToken createPasswordToken(User user) throws SQLException {
+        PasswordToken passwordToken= new PasswordToken((int) user.getId());
+        this.passwordTokenRepository.save(passwordToken);
+        return passwordToken;
+    }
+
+    @Override
+    public User findUserbyPasswordToken(String token) throws SQLException {
+       int id =  this.passwordTokenRepository.findUserByToken(token).getIdUser();
+       User user = this.accountRepository.findById(id);
+       return user;
+    }
+
+    @Override
+    public void deletePasswordToken(String token) throws SQLException {
+        this.passwordTokenRepository.deletePasswordToken(token);
+    }
+
+    @Override
+    public User usernamefromrequest(HttpServletRequest request) throws SQLException {
+        try {
+            String authtoken = request.getHeader(JWTUtil.AUTH_HEADER);
+            String token = authtoken.substring(JWTUtil.PREFIX.length());
+            Algorithm algorithm = Algorithm.HMAC256(JWTUtil.SECRET);
+            JWTVerifier jwtVerifier = JWT.require(algorithm).build();
+            DecodedJWT decodedJWT = jwtVerifier.verify(token);
+            String username = decodedJWT.getSubject();
+            return this.accountRepository.findByUsername(username);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+/*
+
 
     @Override
     public void deleteToken(VerificationToken token) {

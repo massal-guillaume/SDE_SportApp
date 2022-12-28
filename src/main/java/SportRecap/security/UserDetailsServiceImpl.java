@@ -1,8 +1,10 @@
 package SportRecap.security;
 
 
+import SportRecap.DAO.AccountRepository;
 import SportRecap.model.User;
 import SportRecap.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,10 +17,12 @@ import java.util.ArrayList;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private AccountService accountService;
+    private AccountRepository accountRepository;
 
-    public UserDetailsServiceImpl(AccountService AccountService) {
-        this.accountService = accountService;
+
+    @Autowired
+    public UserDetailsServiceImpl( AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -26,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         User user = null;
         try {
-            user = accountService.findUserbyUsername(username);
+            user =  accountRepository.findByUsername(username);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

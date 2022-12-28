@@ -1,5 +1,6 @@
 package SportRecap.DAO;
 
+import SportRecap.security.JWTUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.stereotype.Repository;
@@ -10,13 +11,10 @@ import java.sql.*;
 public class ConnectionPoolManager {
 
         private HikariDataSource dataSource;
-
         private String hostname;
-        private String port;
-        private String database;
         private String username;
         private String password;
-        private String tablename;
+
 
         public ConnectionPoolManager() {
             init();
@@ -29,34 +27,20 @@ public class ConnectionPoolManager {
 
 
         private void init() {
-            hostname = plugin.getConfig().getString("sql.hostname");
-            port = plugin.getConfig().getString("sql.port");
-            database = plugin.getConfig().getString("sql.database");
-            username = plugin.getConfig().getString("sql.username");
-            password = plugin.getConfig().getString("sql.password");
-            tablename = plugin.getConfig().getString("sql.tablename");
-        }
-
-        public String getTablename() {
-            return this.tablename;
+            hostname = JWTUtil.JDBC_URL;
+            username = JWTUtil.JDBC_USERNAME;
+            password = JWTUtil.JDBC_PASSWORD;
         }
 
         private void setupPool() {
             HikariConfig config = new HikariConfig();
-            config.setJdbcUrl(
-                    "jdbc:mysql://" +
-                            hostname +
-                            ":" +
-                            port +
-                            "/" +
-                            database
-            );
-            config.setDriverClassName("com.mysql.jdbc.Driver");
+            config.setJdbcUrl(this.hostname);
+            config.setDriverClassName("com.mysql.cj.jdbc.Driver");
             config.setUsername(username);
             config.setPassword(password);
             config.setMaxLifetime(600000L);
             config.setIdleTimeout(300000L);
-            config.setLeakDetectionThreshold(300000L);
+            config.setLeakDetectionThreshold(180000);
             config.setConnectionTimeout(100000L);
             dataSource = new HikariDataSource(config);
         }
@@ -75,8 +59,5 @@ public class ConnectionPoolManager {
                 dataSource.close();
             }
         }
-
-
-
     }
 

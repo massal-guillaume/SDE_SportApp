@@ -1,25 +1,30 @@
 package SportRecap.model;
 
 import SportRecap.security.JWTUtil;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
+@Getter
+@Setter
 public class PasswordToken {
 
 
-    private long id;
+    private int idUser;
 
     private String token;
 
     private Date expirationTime;
 
-    private User user;
 
-    public PasswordToken(String token, User user) {
+    public PasswordToken(int idUser) {
         super();
-        this.token = token;
-        this.user = user;
+        this.token =  UUID.randomUUID().toString();
+        this.idUser = idUser;
         this.expirationTime= expidate(JWTUtil.EXPIRATION_PASSWORD_TOKEN);
     }
 
@@ -27,6 +32,12 @@ public class PasswordToken {
         super();
         this.token = token;
         this.expirationTime= expidate(JWTUtil.EXPIRATION_PASSWORD_TOKEN);
+    }
+
+    public PasswordToken(int idUser, String token, Date date) {
+        this.token =  token;
+        this.idUser = idUser;
+        this.expirationTime= date;
     }
 
     private Date expidate(int expirationTime){

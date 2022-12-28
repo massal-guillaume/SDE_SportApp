@@ -1,43 +1,42 @@
 package SportRecap.controller;
 
-import SportRecap.model.Exercice;
+import SportRecap.model.PasswordModel;
 import SportRecap.model.User;
 import SportRecap.model.UserModel;
 import SportRecap.model.VerificationToken;
-import SportRecap.security.JWTUtil;
 import SportRecap.service.AccountService;
+import SportRecap.service.EmailSenderService;
 import SportRecap.service.ExerciceService;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.SQLException;
 
+@RestController
 public class SportController {
 
 
-    private AccountService userService;
+    private AccountService accountService;
     private ExerciceService exerciceService;
     private ApplicationEventPublisher publisher;
 
-    public SportController(AccountService accountService,ExerciceService exerciceService,ApplicationEventPublisher publisher) {
-        this.userService = userService;
+    private JavaMailSender javaMailSender;
+    private EmailSenderService emailSenderService;
+
+    @Autowired
+    public SportController(AccountService accountService,ExerciceService exerciceService,ApplicationEventPublisher publisher,EmailSenderService emailSenderService,JavaMailSender javaMailSender) {
+        this.accountService = accountService;
         this.exerciceService = exerciceService;
+        this.emailSenderService = emailSenderService;
+        this.javaMailSender = javaMailSender;
         this.publisher=publisher;
     }
-/*
+
     private String getAppUrl(HttpServletRequest request){
         return "http://" +
                 request.getServerName() +
@@ -46,93 +45,91 @@ public class SportController {
                 request.getContextPath();
     }
 
-    @PostMapping("/resetpassword")
-    public String resetPassword(@RequestParam("email") String email, HttpServletRequest request){
-        User user =  this.userService.findUserbyEmail(email);
+    @PostMapping("/resetpasswordRequest")
+    public ResponseEntity resetPassword(@RequestParam("email") String email, HttpServletRequest request) throws SQLException {
+        User user =  this.accountService.findUserbyEmail(email);
         if(user!=null){
-            String token = this.userService.createPasswordToken(user);
-            this.userService.sendResetPasswordMail(user,token,getAppUrl(request));
-
+            this.emailSenderService.sendMail(user,this.accountService.createPasswordToken(user).getToken(),getAppUrl(request),"requestresetpassword",this.javaMailSender);
         }
-        return "Un email à été envoyer à l'adresse email pour réinitialiser votre mot de passe";
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body("An Email have been send on your mailbox to reset your password");
     }
 
-*/
     @PostMapping(path="/register")
     public ResponseEntity saveUser(@RequestBody UserModel usermodel, final HttpServletRequest request) throws Exception{
-        System.out.println("REGISTER");
-        if(this.userService.addNewUser(usermodel)!=null){
-            //send MAIL
+        User user = this.accountService.addNewUser(usermodel);
+        if(user != null){
+            this.emailSenderService.sendMail(user,this.accountService.createVerifToken(user).getToken(),this.getAppUrl(request),"registration",this.javaMailSender);
+            return ResponseEntity
+                    .status(HttpStatus.ACCEPTED)
+                    .body(user.getEmail()+"\n"+user.getUsername());
             }else{
-                return ResponseEntity
+            return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
                         .body("Username or email already used");
             }
-        return null;
     }
-/*
-    @GetMapping("/newpassword")
-    public String newPassword(@RequestParam("token") String token,@RequestBody String passwordModel){
-        if(userService.veryPasswordTolen(token,passwordModel)){
-            return "Nouveau mot de passe bien modifier";
-        }return "Un probleme est survenue, veuillez reesayer";
-
-    }
-
     @GetMapping("/confirmation")
-    public String verifyRegistration(@RequestParam("token") String token){
-        if(userService.verifyVerificationToken(token)){
-            return "Confirmation bien effectue";
-        }else return "Erreur, veuillez re demandez une email de confirmation si vous n'etes pas inscrit";
+    public String verifyRegistration(@RequestParam("token") String token) throws SQLException {
+        if(accountService.verifyVerificationToken(token)){
+            return "Your account as been confirmed \n Go back on the Login Page off the application to start use the app !";
+        }else return "An error as occured, your confrmation link is not valid anymore, go back in the login page and ask for a new Confirmation Link ";
     }
 
     @GetMapping("/reconfirmation")
-    public String resendConfirmation(@RequestParam("email") String email,final HttpServletRequest request){
-        User user = this.userService.findUserbyEmail(email);
-        if(this.userService.findUserbyEmail(email)==null) return "Adresse Mail introuvable, veuillez vous inscrire";
+    public ResponseEntity resendConfirmation(@RequestParam("email") String email,final HttpServletRequest request) throws SQLException {
+        User user = this.accountService.findUserbyEmail(email);
+        if(user==null) return  ResponseEntity.status(HttpStatus.ACCEPTED).body("Impossible to find your email, are you register ?");
         if(user.isAccountactivated()==false) {
-
-            if(this.userService.getTokenfromUser(user) != null){
-                VerificationToken token = this.userService.getTokenfromUser(user);
-                this.userService.deleteToken(token);
+            VerificationToken token = this.accountService.getVerifTokenfromUser(user.getId());
+            if(token != null){
+               this.accountService.deleteVerifToken(token);
             }
-            publisher.publishEvent(new SendConfirmationEvent(user,getAppUrl(request)));
-        }else return "Votre compte a deja été confirmer";
-        return "Nouveau Lien de Confirmation Envoyer !";
+            this.emailSenderService.sendMail(user,this.accountService.createPasswordToken(user).getToken(),this.getAppUrl(request),"registration",this.javaMailSender);
+        }else {
+            return ResponseEntity
+                    .status(HttpStatus.ACCEPTED)
+                    .body("Your account is already confirmed");
+        }
+        return  ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body("An email have been send to confirm your account");
     }
+
+
+    @GetMapping("/resetpassword")
+    public ResponseEntity SendNewPassword(@RequestParam("token") String token) throws SQLException {
+        User user =  this.accountService.findUserbyPasswordToken(token);
+        if(user!=null){
+            String password = this.accountService.generateRandomPassword();
+            this.accountService.changepassword(password,user);
+            this.emailSenderService.sendMail(user,password,"","resetpassword",this.javaMailSender);
+            this.accountService.deletePasswordToken(token);
+        }
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body("An Email have been send on your mailbox with your new password");
+    }
+
+
+    @PostMapping("/newpassword")
+    public ResponseEntity ChangePassword(@RequestBody PasswordModel password, final HttpServletRequest request) throws SQLException {
+        User user = this.accountService.usernamefromrequest(request);
+        if(password.length() < 5){ return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Password too short, try again pleas !");}
+        else {
+            this.accountService.changepassword(password.getPassword(), user);
+            return ResponseEntity
+                    .status(HttpStatus.ACCEPTED)
+                    .body("Password changed !");
+        }
+    }
+
+/*
 
     @GetMapping(path="/user")
     public User getUser(HttpServletRequest request) {
         return this.userService.findUserbyUsername(this.userService.usernamefromrequest(request));
-    }
-
-    @GetMapping(path="/refreshtoken")
-    public void rereshtoken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String authtoken = request.getHeader(JWTUtil.AUTH_HEADER);
-        if(authtoken!= null && authtoken.startsWith(JWTUtil.PREFIX)){
-            try {
-                String token = authtoken.substring(JWTUtil.PREFIX.length());
-                Algorithm algorithm = Algorithm.HMAC256(JWTUtil.SECRET);
-                JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-                DecodedJWT decodedJWT = jwtVerifier.verify(token);
-                String username = decodedJWT.getSubject();
-                User user = this.userService.findUserbyUsername(username);
-                String jwttokenaccess = JWT.create()
-                        .withSubject(user.getUsername())
-                        .withExpiresAt(new Date(System.currentTimeMillis()+JWTUtil.EXPIRE_ACESS_TOKEN))
-                        .withIssuer(request.getRequestURL().toString())
-                        .sign(algorithm);
-                Map<String,String> idtoken = new HashMap<>();
-                idtoken.put("access-token",jwttokenaccess);
-                idtoken.put("refresh-token",token);
-                response.setContentType("aplication/json");
-                new ObjectMapper().writeValue(response.getOutputStream(),idtoken);
-            }catch (Exception e){
-                throw e;
-            }
-        }else{
-            throw new RuntimeException("Refresh Token required");
-        }
     }
 
     @PostMapping(path ="/exercice")

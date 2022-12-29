@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 public class SportRecapV1Application {
@@ -18,5 +19,7 @@ public class SportRecapV1Application {
 	{
 		return new BCryptPasswordEncoder();
 	}
+
+
 
 }

@@ -13,13 +13,13 @@ import java.util.Collection;
 @NoArgsConstructor
 public class User {
 
-    private long id;
+    private int id;
     private String email;
     private boolean accountactivated = false;
     private String username;
     private String password;
 
-    public User(Long id, String email, Boolean accountactivated, String username, String password) {
+    public User(int id, String email, Boolean accountactivated, String username, String password) {
         this.id = id;
         this.email = email;
         this.accountactivated = accountactivated;

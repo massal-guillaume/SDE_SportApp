@@ -1,12 +1,10 @@
 package SportRecap.controller;
 
-import SportRecap.model.PasswordModel;
-import SportRecap.model.User;
-import SportRecap.model.UserModel;
-import SportRecap.model.VerificationToken;
+import SportRecap.model.*;
 import SportRecap.service.AccountService;
 import SportRecap.service.EmailSenderService;
 import SportRecap.service.ExerciceService;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -15,7 +13,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collection;
 
 @RestController
 public class SportController {
@@ -124,6 +124,17 @@ public class SportController {
                     .body("Password changed !");
         }
     }
+
+    @GetMapping(path="/exercice")
+    public Collection<Exercice> getexos(HttpServletRequest request) throws SQLException {
+        return this.exerciceService.listExercice(this.accountService.usernamefromrequest(request).getId());
+    }
+
+    @GetMapping(path="/newexo")
+    public void newexos () throws JSONException, IOException {
+       this.exerciceService.getToken();
+    }
+
 
 /*
 

@@ -96,7 +96,7 @@ public class AccountServiceImpl implements AccountService {
         return true;
     }
 
-    private User finUserbyId(long idUser) throws SQLException {
+    private User finUserbyId(int idUser) throws SQLException {
         return this.accountRepository.findById(idUser);
 
     }

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 public class VerificationToken {
 
-    private long idUser;
+    private int idUser;
 
     private String token;
 
@@ -32,7 +32,7 @@ public class VerificationToken {
         this.expirationTime= expidate(JWTUtil.EXPIRATION_REGISTER_TOKEN);
     }
 
-    public VerificationToken(long idUser,String token,Date expirationTime) {
+    public VerificationToken(int idUser,String token,Date expirationTime) {
         this.token = token;
         this.expirationTime = expirationTime;
         this.idUser = idUser;

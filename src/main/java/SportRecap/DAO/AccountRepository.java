@@ -21,7 +21,7 @@ public class AccountRepository {
     }
 
     public User findByUsername(String username) throws SQLException {
-        Long id = null;
+        Integer id = null;
         String email = null;
         Boolean accountactivated = null;
         String name = null;
@@ -33,7 +33,7 @@ public class AccountRepository {
         ResultSet res = stat.executeQuery();
 
         while (res.next()) {
-            id = res.getLong(1);
+            id = res.getInt(1);
             email = res.getString(2);
             accountactivated = res.getBoolean(3);
             name = res.getString(4);
@@ -49,7 +49,7 @@ public class AccountRepository {
     }
 
     public User findByEmail(String email) throws SQLException {
-        Long id = null;
+        Integer id = null;
         String mail = null;
         Boolean accountactivated = null;
         String username = null;
@@ -61,7 +61,7 @@ public class AccountRepository {
         ResultSet res = stat.executeQuery();
 
         while (res.next()) {
-            id = res.getLong(1);
+            id = res.getInt(1);
             email = res.getString(2);
             accountactivated = res.getBoolean(3);
             username = res.getString(4);
@@ -91,7 +91,7 @@ public class AccountRepository {
 
 
     public List<User> findAll() throws SQLException {
-        Long id = null;
+        Integer id = null;
         String email = null;
         Boolean accountactivated = null;
         String username = null;
@@ -104,7 +104,7 @@ public class AccountRepository {
         ResultSet res = stat.executeQuery();
 
         while (res.next()) {
-            id = res.getLong(1);
+            id = res.getInt(1);
             email = res.getString(2);
             accountactivated = res.getBoolean(4);
             username = res.getString(5);
@@ -116,8 +116,8 @@ public class AccountRepository {
         return listeUser;
     }
 
-    public User findById(long idUser) throws SQLException {
-        Long id = null;
+    public User findById(int idUser) throws SQLException {
+        Integer id = null;
         String email = null;
         Boolean accountactivated = null;
         String username = null;
@@ -125,7 +125,7 @@ public class AccountRepository {
 
         Connection connection = this.pool.getConnection();
         PreparedStatement stat = connection.prepareStatement("SELECT * FROM user WHERE id= ?");
-        stat.setLong(1, idUser);
+        stat.setInt(1, idUser);
         ResultSet res = stat.executeQuery();
 
         while (res.next()) {
@@ -151,7 +151,7 @@ public class AccountRepository {
         stat.setString(1, user.getEmail());
         stat.setBoolean(2, user.isAccountactivated());
         stat.setString(3, user.getUsername());
-        stat.setLong(4, user.getId());
+        stat.setInt(4, user.getId());
         stat.executeUpdate();
         connection.close();
         }
@@ -162,9 +162,10 @@ public class AccountRepository {
             Connection connection = this.pool.getConnection();
             PreparedStatement stat = connection.prepareStatement("UPDATE user SET  password =? WHERE id=?");
             stat.setString(1, password);;
-            stat.setLong(2, user.getId());
+            stat.setInt(2, user.getId());
             stat.executeUpdate();
             connection.close();
         }
     }
+
 }

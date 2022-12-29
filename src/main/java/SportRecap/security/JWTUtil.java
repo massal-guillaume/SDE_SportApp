@@ -18,5 +18,9 @@ public class JWTUtil {
     public static final String JDBC_USERNAME="root";
     public static final String JDBC_PASSWORD="A2000091223";
 
+    //API
+    public static final String API_USERNAME = "sportrecap";
+    public static final String API_PASSWORD =  "spr12345";
+
 
 }

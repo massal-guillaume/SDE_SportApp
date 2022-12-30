@@ -12,17 +12,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Exercice {
 
-    private Long uuid;
+    private Long id;
 
     private String categorie;
 
     private int currentWeight;
 
+    private String muscle;
+
     private String description;
 
-    private List<Integer> WeightHistoric;
 
-
-
-
+    public Exercice(String categorie, int currentWeight, String muscle, String description) {
+        this.categorie = categorie;
+        this.currentWeight = currentWeight;
+        this.muscle = muscle;
+        this.description = description;
+    }
 }

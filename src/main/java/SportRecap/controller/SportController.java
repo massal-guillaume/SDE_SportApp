@@ -135,6 +135,11 @@ public class SportController {
        this.exerciceService.getToken();
     }
 
+    @GetMapping(path="/getexo")
+    public void getexos() throws IOException {
+        this.exerciceService.getExercice();
+    }
+
 
 /*
 

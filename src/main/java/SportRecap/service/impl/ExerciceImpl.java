@@ -34,4 +34,10 @@ public class ExerciceImpl implements ExerciceService {
     public String getToken() throws JSONException, IOException {
         return this.externalExerciceGrabber.getToken();
     }
+
+    @Override
+    public void getExercice() throws IOException {
+        this.externalExerciceGrabber.getExercice();
+    }
+
 }

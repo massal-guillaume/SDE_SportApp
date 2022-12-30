@@ -12,4 +12,7 @@ public interface ExerciceService {
     Collection<Exercice> listExercice(int id);
 
     String getToken() throws JSONException, IOException;
+
+    void getExercice() throws IOException;
+
 }

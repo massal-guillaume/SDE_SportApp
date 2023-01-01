@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
 
 @Service
@@ -36,8 +37,22 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public void getExercice() throws IOException {
-        this.externalExerciceGrabber.getExercice();
+    public void saveExercice(User user , int exo_idFromList) throws JSONException, IOException, SQLException {
+        Exercice exercice = this.exerciceRepository.getExoFromList(exo_idFromList);
+        this.exerciceRepository.addUserExo(user.getId(),exercice);
     }
 
+    @Override
+    public Collection<Exercice> getUserExercice(User usernamefromrequest) throws SQLException {
+        return this.exerciceRepository.getUserExo(usernamefromrequest.getId());
+    }
+
+    @Override
+    public void addNewCharge(int exoId, int weight, User user) {
+    }
+
+    @Override
+    public void grabExercice() throws IOException, SQLException, JSONException {
+        this.externalExerciceGrabber.grabExercice();
+    }
 }

@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -14,6 +16,7 @@ public class Exercice {
 
     private Long id;
 
+    private String name;
     private String categorie;
 
     private int currentWeight;
@@ -22,11 +25,33 @@ public class Exercice {
 
     private String description;
 
+    private Map<Date,Integer> history;
 
-    public Exercice(String categorie, int currentWeight, String muscle, String description) {
+
+    public Exercice(String name,String categorie,String muscle, String description) {
+        this.name = name;
         this.categorie = categorie;
-        this.currentWeight = currentWeight;
         this.muscle = muscle;
         this.description = description;
+    }
+
+    public Exercice(String name, String categorie, String muscle, String description, Map<Date,Integer> history) {
+        this.name = name;
+        this.categorie = categorie;
+        this.muscle = muscle;
+        this.description = description;
+        this.history = history;
+    }
+
+    @Override
+    public String toString() {
+        return "Exercice{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", categorie='" + categorie + '\'' +
+                ", currentWeight=" + currentWeight +
+                ", muscle='" + muscle + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

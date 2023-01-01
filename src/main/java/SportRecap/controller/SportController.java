@@ -78,7 +78,7 @@ public class SportController {
     }
 
     @GetMapping("/reconfirmation")
-    public ResponseEntity resendConfirmation(@RequestParam("email") String email,final HttpServletRequest request) throws SQLException {
+    public ResponseEntity resendConfirmation(@RequestParam("email") String email, HttpServletRequest request) throws SQLException {
         User user = this.accountService.findUserbyEmail(email);
         if(user==null) return  ResponseEntity.status(HttpStatus.ACCEPTED).body("Impossible to find your email, are you register ?");
         if(user.isAccountactivated()==false) {
@@ -114,7 +114,7 @@ public class SportController {
 
 
     @PostMapping("/newpassword")
-    public ResponseEntity ChangePassword(@RequestBody PasswordModel password, final HttpServletRequest request) throws SQLException {
+    public ResponseEntity ChangePassword(@RequestBody PasswordModel password, HttpServletRequest request) throws SQLException {
         User user = this.accountService.usernamefromrequest(request);
         if(password.length() < 5){ return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Password too short, try again pleas !");}
         else {
@@ -125,54 +125,32 @@ public class SportController {
         }
     }
 
-    @GetMapping(path="/exercice")
-    public Collection<Exercice> getexos(HttpServletRequest request) throws SQLException {
+    @GetMapping(path="/liste_exercice")
+    public Collection<Exercice> getListeExos(HttpServletRequest request) throws SQLException {
         return this.exerciceService.listExercice(this.accountService.usernamefromrequest(request).getId());
     }
 
-    @GetMapping(path="/newexo")
-    public void newexos () throws JSONException, IOException {
-       this.exerciceService.getToken();
+    @GetMapping(path="/grabexo")
+    public void grabexos() throws IOException, SQLException, JSONException {
+        this.exerciceService.grabExercice();
     }
 
-    @GetMapping(path="/getexo")
-    public void getexos() throws IOException {
-        this.exerciceService.getExercice();
+    @PostMapping(path="/save_exo")
+    public void save_exo(@RequestBody int id,HttpServletRequest request) throws SQLException, JSONException, IOException {
+        User user = this.accountService.usernamefromrequest(request);
+        this.exerciceService.saveExercice(user,id);
     }
 
-
-/*
-
-    @GetMapping(path="/user")
-    public User getUser(HttpServletRequest request) {
-        return this.userService.findUserbyUsername(this.userService.usernamefromrequest(request));
-    }
-
-    @PostMapping(path ="/exercice")
-    public ResponseEntity saveExercice(@RequestBody Exercice exo, HttpServletRequest request){
-        try {
-            this.userService.addNewExercice(this.userService.usernamefromrequest(request),exo);
-        }catch (Exception e){
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body("Il y a déjà un exercice du meme nom");
-        }
-        return null;
-    }
 
     @GetMapping(path="/exercice")
-    public Collection<Exercice> getexos(HttpServletRequest request){
-        return this.userService.listExercice(this.userService.usernamefromrequest(request));
-    }
-
-    @GetMapping(path="/exercice/{categorie}")
-    public Collection<Exercice> getexocategorie(@PathVariable String categorie, HttpServletRequest request){
-        return this.userService.categorieExo(this.userService.usernamefromrequest(request),categorie);
+    public Collection<Exercice> getUserExercice( HttpServletRequest request) throws SQLException {
+        return this.exerciceService.getUserExercice(this.accountService.usernamefromrequest(request));
     }
 
     @PostMapping(path="/exercice/{charge}")
-    public void addNewCharge(@PathVariable String categorie){
-
+    public void addNewCharge(@PathVariable int exoId,@PathVariable int weight,HttpServletRequest request) throws SQLException {
+        User user = this.accountService.usernamefromrequest(request);
+        this.exerciceService.addNewCharge(exoId,weight,user);
     }
-*/
+
 }

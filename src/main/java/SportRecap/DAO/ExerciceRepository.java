@@ -2,7 +2,6 @@ package SportRecap.DAO;
 
 
 import SportRecap.model.Exercice;
-import SportRecap.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -26,14 +25,14 @@ public class ExerciceRepository {
 
     public void addUserExo(int user_id,Exercice exercice) throws SQLException {
         Connection connection = this.pool.getConnection();
-        PreparedStatement stat = connection.prepareStatement("INSERT INTO  exercice (`id_user`,`name`, `category`,`muscle`,`description`,`lastweight`) VALUES (?,?,?,?,?)");
+        PreparedStatement stat = connection.prepareStatement("INSERT INTO  exercice (`id_user`,`name`, `category`,`muscle`,`description`,`lastweight`) VALUES (?,?,?,?,?,?)");
         stat.setInt(1,user_id);
         stat.setString(2, exercice.getName());
         stat.setString(3, exercice.getCategorie());
         if(exercice.getMuscle()!=null) stat.setString(4,exercice.getMuscle());
-        else stat.setString(5,"null");
-        stat.setString(6,exercice.getDescription());
-        stat.setInt(7,exercice.getCurrentWeight());
+        else stat.setString(4,"null");
+        stat.setString(5,exercice.getDescription());
+        stat.setInt(6,exercice.getCurrentWeight());
         stat.executeUpdate();
         connection.close();
     }
@@ -51,28 +50,22 @@ public class ExerciceRepository {
          ResultSet res = stat.executeQuery();
 
          while (res.next()) {
-             name = res.getString(1);
-             categorie = res.getString(2);
-             muscle = res.getString(3);
-             description = res.getString(4);
+             id = id_exo;
+             name = res.getString(2);
+             categorie = res.getString(3);
+             muscle = res.getString(4);
+             description = res.getString(5);
          }
          connection.close();
          if(id == 0){
              return null;
          }else {
-             Exercice exercice = new Exercice(name,categorie,muscle,description);
-             return exercice;
+             return new Exercice(name,categorie,muscle,description);
          }
      }
 
 
     public Collection<Exercice> getUserExo(int userId) throws SQLException {
-        int id = 0;
-        String name = null;
-        String categorie = null;
-        String muscle = null;
-        String description = null;
-        Map<Date,Integer> history = new HashMap<>();
 
         Connection connection = this.pool.getConnection();
         PreparedStatement stat = connection.prepareStatement("SELECT * FROM exercice WHERE id_user = ?");
@@ -80,16 +73,17 @@ public class ExerciceRepository {
         ResultSet res = stat.executeQuery();
 
         List<Exercice> exercices= new ArrayList<>();
+        int id = 0;
 
         while (res.next()) {
-            id = userId;
-            name = res.getString(1);
-            categorie = res.getString(2);
-            muscle = res.getString(3);
-            description = res.getString(4);
-            history = this.gethistory(userId);
-            Exercice exercice = new Exercice(name,categorie,muscle,description,history);
-            exercices.add(exercice);
+           id = res.getInt(1);
+           String name = res.getString(3);
+           String categorie = res.getString(4);
+           String  muscle = res.getString(5);
+           String  description = res.getString(6);
+           Map<Date,Integer> history = this.gethistory(userId);
+           Exercice exercice = new Exercice(id,name,categorie,muscle,description,history);
+           exercices.add(exercice);
         }
         connection.close();
         if(id == 0){
@@ -103,20 +97,17 @@ public class ExerciceRepository {
         Map<Date,Integer> history = new HashMap<>();
 
         int id = 0;
-        Date date = null;
-        int weight = 0;
 
         Connection connection = this.pool.getConnection();
-        PreparedStatement stat = connection.prepareStatement("SELECT * FROM exo_history WHERE exoId = ?");
+        PreparedStatement stat = connection.prepareStatement("SELECT * FROM history WHERE id_exo = ?");
         stat.setInt(1, exoId);
         ResultSet res = stat.executeQuery();
 
-        List<Exercice> exercices= new ArrayList<>();
 
         while (res.next()) {
             id = exoId;
-            weight = res.getInt(1);
-            date = res.getDate(2);
+            int weight = res.getInt(1);
+            Date date = res.getDate(2);
             history.put(date,weight);
         }
         connection.close();
@@ -127,5 +118,44 @@ public class ExerciceRepository {
         }
     }
 
+
+    public void updateExo(int exoId, int weight) throws SQLException {
+        Connection connection = this.pool.getConnection();
+        PreparedStatement stat = connection.prepareStatement("UPDATE exercice SET  lastweight=? WHERE idexercice=?");
+        stat.setInt(1,weight);
+        stat.setInt(2,exoId);
+        stat.executeUpdate();
+        connection.close();
+    }
+
+    public void addWeightInHistory(int exoId, int weight,Date date) throws SQLException {
+        Connection connection = this.pool.getConnection();
+        PreparedStatement stat = connection.prepareStatement("INSERT INTO  history (`id_exo`,`weight`, `date`) VALUES (?,?,?)");
+        stat.setInt(1,exoId);
+        stat.setInt(2, weight);
+        stat.setTimestamp(3, new java.sql.Timestamp(date.getTime()));
+        stat.executeUpdate();
+        connection.close();
+    }
+
+    public Collection<Exercice> getAllExoFromList() throws SQLException {
+        List<Exercice> exercices = new ArrayList<>();
+
+        Connection connection = this.pool.getConnection();
+        PreparedStatement stat = connection.prepareStatement("SELECT * FROM exerciceliste");
+        ResultSet res = stat.executeQuery();
+
+        while (res.next()) {
+            int id = res.getInt(1);
+            String name = res.getString(2);
+            String categorie = res.getString(3);
+            String muscle = res.getString(4);
+            String description = res.getString(5);
+            Exercice exercice = new Exercice(id,name,categorie,muscle,description,null);
+            exercices.add(exercice);
+        }
+        connection.close();
+            return exercices;
+        }
 
 }

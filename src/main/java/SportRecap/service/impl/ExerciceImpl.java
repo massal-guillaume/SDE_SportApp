@@ -17,9 +17,9 @@ import java.util.Collection;
 public class ExerciceImpl implements ExerciceService {
 
 
-    private ExerciceRepository exerciceRepository;
+    private final ExerciceRepository exerciceRepository;
 
-    private ExternalExerciceGrabber externalExerciceGrabber;
+    private final ExternalExerciceGrabber externalExerciceGrabber;
     @Autowired
     public ExerciceImpl(ExerciceRepository exerciceRepository,ExternalExerciceGrabber externalExerciceGrabber){
         this.exerciceRepository = exerciceRepository;
@@ -27,8 +27,8 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public Collection<Exercice> listExercice(int id) {
-       return null;
+    public Collection<Exercice> listExercice() throws SQLException {
+       return this.exerciceRepository.getAllExoFromList();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public void saveExercice(User user , int exo_idFromList) throws JSONException, IOException, SQLException {
+    public void saveExercice(User user , int exo_idFromList) throws SQLException {
         Exercice exercice = this.exerciceRepository.getExoFromList(exo_idFromList);
         this.exerciceRepository.addUserExo(user.getId(),exercice);
     }
@@ -48,9 +48,11 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public void addNewCharge(int exoId, int weight, User user) {
+    public void addNewCharge(int exoId, int weight) throws SQLException {
+        this.exerciceRepository.updateExo(exoId,weight);
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        this.exerciceRepository.addWeightInHistory(exoId,weight,date);
     }
-
     @Override
     public void grabExercice() throws IOException, SQLException, JSONException {
         this.externalExerciceGrabber.grabExercice();

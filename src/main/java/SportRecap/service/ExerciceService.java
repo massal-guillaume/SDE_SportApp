@@ -3,14 +3,13 @@ package SportRecap.service;
 import SportRecap.model.Exercice;
 import SportRecap.model.User;
 import org.json.JSONException;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 
 public interface ExerciceService {
-    Collection<Exercice> listExercice(int id);
+    Collection<Exercice> listExercice() throws SQLException;
 
     String getToken() throws JSONException, IOException;
 
@@ -19,5 +18,5 @@ public interface ExerciceService {
 
     Collection<Exercice> getUserExercice(User usernamefromrequest) throws SQLException;
 
-    void addNewCharge(int exoId, int weight, User user);
+    void addNewCharge(int exoId, int weight) throws SQLException;
 }

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -14,7 +13,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class Exercice {
 
-    private Long id;
+    private int id;
 
     private String name;
     private String categorie;
@@ -35,7 +34,8 @@ public class Exercice {
         this.description = description;
     }
 
-    public Exercice(String name, String categorie, String muscle, String description, Map<Date,Integer> history) {
+    public Exercice(int id, String name, String categorie, String muscle, String description, Map<Date,Integer> history) {
+        this.id = id;
         this.name = name;
         this.categorie = categorie;
         this.muscle = muscle;

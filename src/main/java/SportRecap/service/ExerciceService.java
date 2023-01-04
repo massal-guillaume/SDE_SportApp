@@ -14,9 +14,11 @@ public interface ExerciceService {
     String getToken() throws JSONException, IOException;
 
     void  grabExercice() throws JSONException,IOException, SQLException;
-    void saveExercice(User user , int exo_id) throws JSONException, IOException, SQLException;
+    boolean saveExercice(User user , int exo_id) throws JSONException, IOException, SQLException;
 
     Collection<Exercice> getUserExercice(User usernamefromrequest) throws SQLException;
 
     void addNewCharge(int exoId, int weight) throws SQLException;
+
+    Collection<String> getCategory() throws SQLException;
 }

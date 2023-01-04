@@ -6,6 +6,8 @@ import SportRecap.service.EmailSenderService;
 import SportRecap.service.ExerciceService;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,11 +27,12 @@ public class SportController {
     private final EmailSenderService emailSenderService;
 
     @Autowired
-    public SportController(AccountService accountService,ExerciceService exerciceService,EmailSenderService emailSenderService,JavaMailSender javaMailSender) {
+    public SportController(AccountService accountService,ExerciceService exerciceService,EmailSenderService emailSenderService,JavaMailSender javaMailSender) throws SQLException, JSONException, IOException {
         this.accountService = accountService;
         this.exerciceService = exerciceService;
         this.emailSenderService = emailSenderService;
         this.javaMailSender = javaMailSender;
+        //this.exerciceService.grabExercice();
     }
 
     private String getAppUrl(HttpServletRequest request){
@@ -111,15 +114,14 @@ public class SportController {
         return this.exerciceService.listExercice();
     }
 
-    @GetMapping(path="/grabexo")
-    public void grabexos() throws IOException, SQLException, JSONException {
-        this.exerciceService.grabExercice();
-    }
 
     @GetMapping(path="/save_exo/{id}")
-    public void save_exo(@PathVariable int id,HttpServletRequest request) throws SQLException, JSONException, IOException {
+    public ResponseEntity<String> save_exo(@PathVariable int id, HttpServletRequest request) throws SQLException, JSONException, IOException {
         User user = this.accountService.usernamefromrequest(request);
-        this.exerciceService.saveExercice(user,id);
+        if(!this.exerciceService.saveExercice(user, id)){
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("Exercise already in your list");
+        }
+        return null;
     }
 
 
@@ -133,6 +135,10 @@ public class SportController {
         this.exerciceService.addNewCharge(exoId,weight);
     }
 
+    @GetMapping(path="/category")
+    public Collection<String> getCattegory() throws SQLException{
+       return this.exerciceService.getCategory();
+    }
 
 
 }

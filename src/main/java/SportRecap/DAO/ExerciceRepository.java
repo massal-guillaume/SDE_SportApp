@@ -158,4 +158,32 @@ public class ExerciceRepository {
             return exercices;
         }
 
+    public Collection<String> getCategory() throws SQLException {
+        List<String> category = new ArrayList<>();
+
+        Connection connection = this.pool.getConnection();
+        PreparedStatement stat = connection.prepareStatement("SELECT * FROM category");
+        ResultSet res = stat.executeQuery();
+
+        while (res.next()) {;
+            category.add(res.getString(2));
+        }
+        connection.close();
+        return category;
+    }
+
+    public boolean checkIfExerciceIsAlreadyRegister(int id,String name) throws SQLException {
+        Connection connection = this.pool.getConnection();
+        PreparedStatement stat = connection.prepareStatement("SELECT * FROM exercice where name=? AND id_user=?");
+        stat.setString(1,name);
+        stat.setInt(2,id);
+        ResultSet res = stat.executeQuery();
+
+        while (res.next()) {;
+            connection.close();
+            return true;
+        }
+        connection.close();
+        return false;
+    }
 }

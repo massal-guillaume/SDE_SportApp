@@ -187,8 +187,6 @@ public class ExternalExerciceGrabber {
 
 
     public void grabExercice() throws IOException, SQLException, JSONException {
-         this.grabCategory();
-         this.grabMuscles();
          CloseableHttpClient httpClient = HttpClientBuilder.create().build();
          try {
              HttpGet request = new HttpGet("https://wger.de/api/v2/exercise/?language=2%0A&limit=300");
@@ -217,7 +215,6 @@ public class ExternalExerciceGrabber {
                  }
 
                  Exercice exercice = new Exercice(name,categorie,muscle,description);
-                 System.out.println(exercice.toString());
                  try {
                      this.saveExo(exercice);
                  } catch (Exception e) {

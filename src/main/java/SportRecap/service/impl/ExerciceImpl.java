@@ -37,9 +37,12 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public void saveExercice(User user , int exo_idFromList) throws SQLException {
+    public boolean saveExercice(User user , int exo_idFromList) throws SQLException {
         Exercice exercice = this.exerciceRepository.getExoFromList(exo_idFromList);
-        this.exerciceRepository.addUserExo(user.getId(),exercice);
+        if(this.exerciceRepository.checkIfExerciceIsAlreadyRegister(user.getId(),exercice.getName())==false){
+            this.exerciceRepository.addUserExo(user.getId(),exercice);
+            return true;
+        }else return false;
     }
 
     @Override
@@ -53,8 +56,16 @@ public class ExerciceImpl implements ExerciceService {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         this.exerciceRepository.addWeightInHistory(exoId,weight,date);
     }
+
+    @Override
+    public Collection<String> getCategory() throws SQLException {
+        return this.exerciceRepository.getCategory();
+    }
+
     @Override
     public void grabExercice() throws IOException, SQLException, JSONException {
+        this.externalExerciceGrabber.grabCategory();
+        this.externalExerciceGrabber.grabMuscles();
         this.externalExerciceGrabber.grabExercice();
     }
 }

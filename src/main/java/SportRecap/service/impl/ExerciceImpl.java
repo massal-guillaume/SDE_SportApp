@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class ExerciceImpl implements ExerciceService {
@@ -27,8 +29,23 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public Collection<Exercice> listExercice() throws SQLException {
-       return this.exerciceRepository.getAllExoFromList();
+    public Collection<Exercice> listExercice(User usernamefromrequest) throws SQLException {
+        List<Exercice> liste = this.exerciceRepository.getAllExoFromList();
+        List<Exercice> personal_liste = this.exerciceRepository.getUserExo(usernamefromrequest.getId());
+        List<Exercice> final_liste = new ArrayList<>();
+        if(personal_liste!=null) {
+            for (Exercice exercice : liste) {
+                boolean present = false;
+                for (int y = 0; y < personal_liste.size(); y++) {
+                    if (exercice.getName().equals(liste.get(y).getName())) {
+                        present = true;
+                        break;
+                    }
+                }
+                if (!present) final_liste.add(exercice);
+            }
+            return final_liste;
+        }else  return liste;
     }
 
     @Override
@@ -39,7 +56,7 @@ public class ExerciceImpl implements ExerciceService {
     @Override
     public boolean saveExercice(User user , int exo_idFromList) throws SQLException {
         Exercice exercice = this.exerciceRepository.getExoFromList(exo_idFromList);
-        if(this.exerciceRepository.checkIfExerciceIsAlreadyRegister(user.getId(),exercice.getName())==false){
+        if(!this.exerciceRepository.checkIfExerciceIsAlreadyRegister(user.getId(), exercice.getName())){
             this.exerciceRepository.addUserExo(user.getId(),exercice);
             return true;
         }else return false;
@@ -51,10 +68,10 @@ public class ExerciceImpl implements ExerciceService {
     }
 
     @Override
-    public void addNewCharge(int exoId, int weight) throws SQLException {
+    public void addNewCharge(int exoId,int userId,int weight) throws SQLException {
         this.exerciceRepository.updateExo(exoId,weight);
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
-        this.exerciceRepository.addWeightInHistory(exoId,weight,date);
+        this.exerciceRepository.addWeightInHistory(exoId,userId,weight,date);
     }
 
     @Override

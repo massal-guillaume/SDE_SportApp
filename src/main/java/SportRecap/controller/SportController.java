@@ -1,6 +1,7 @@
 package SportRecap.controller;
 
 import SportRecap.model.*;
+import SportRecap.model.mail.NewWeightStruct;
 import SportRecap.service.AccountService;
 import SportRecap.service.EmailSenderService;
 import SportRecap.service.ExerciceService;
@@ -110,8 +111,8 @@ public class SportController {
     }
 
     @GetMapping(path="/liste_exercice")
-    public Collection<Exercice> getListeExos() throws SQLException {
-        return this.exerciceService.listExercice();
+    public Collection<Exercice> getListeExos(HttpServletRequest request) throws SQLException {
+        return this.exerciceService.listExercice(this.accountService.usernamefromrequest(request));
     }
 
 
@@ -130,9 +131,16 @@ public class SportController {
         return this.exerciceService.getUserExercice(this.accountService.usernamefromrequest(request));
     }
 
-    @PostMapping(path="/exercice/{exoId}/{weight}")
-    public void addNewCharge(@PathVariable int exoId,@PathVariable int weight) throws SQLException {
-        this.exerciceService.addNewCharge(exoId,weight);
+    @PostMapping(path="/exercice")
+    public ResponseEntity<String> addNewCharge(@RequestBody NewWeightStruct nws,HttpServletRequest request) throws SQLException {
+        User user = this.accountService.usernamefromrequest(request);
+        try {
+            this.exerciceService.addNewCharge(nws.getId(),user.getId(),nws.getWeight());
+            return null;
+        }catch (Exception e){
+            throw e;
+            //return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("An error as occured, pleas try again");
+        }
     }
 
     @GetMapping(path="/category")

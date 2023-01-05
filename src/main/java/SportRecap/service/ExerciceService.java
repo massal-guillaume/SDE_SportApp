@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 public interface ExerciceService {
-    Collection<Exercice> listExercice() throws SQLException;
+
+    Collection<Exercice> listExercice(User usernamefromrequest) throws SQLException;
 
     String getToken() throws JSONException, IOException;
 
@@ -18,7 +19,7 @@ public interface ExerciceService {
 
     Collection<Exercice> getUserExercice(User usernamefromrequest) throws SQLException;
 
-    void addNewCharge(int exoId, int weight) throws SQLException;
+    void addNewCharge(int exoId,int userId, int weight) throws SQLException;
 
     Collection<String> getCategory() throws SQLException;
 }

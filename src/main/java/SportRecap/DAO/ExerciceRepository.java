@@ -65,7 +65,7 @@ public class ExerciceRepository {
      }
 
 
-    public Collection<Exercice> getUserExo(int userId) throws SQLException {
+    public List<Exercice> getUserExo(int userId) throws SQLException {
 
         Connection connection = this.pool.getConnection();
         PreparedStatement stat = connection.prepareStatement("SELECT * FROM exercice WHERE id_user = ?");
@@ -81,8 +81,9 @@ public class ExerciceRepository {
            String categorie = res.getString(4);
            String  muscle = res.getString(5);
            String  description = res.getString(6);
-           Map<Date,Integer> history = this.gethistory(userId);
-           Exercice exercice = new Exercice(id,name,categorie,muscle,description,history);
+           Map<Date,Integer> history = this.gethistory(id,userId);
+           int currentWeight = res.getInt(7);
+           Exercice exercice = new Exercice(id,name,categorie,muscle,description,history,currentWeight);
            exercices.add(exercice);
         }
         connection.close();
@@ -93,29 +94,25 @@ public class ExerciceRepository {
         }
     }
 
-    private Map<Date,Integer> gethistory(int exoId) throws SQLException {
+    private Map<Date,Integer> gethistory(int exoId,int userId) throws SQLException {
         Map<Date,Integer> history = new HashMap<>();
 
-        int id = 0;
 
         Connection connection = this.pool.getConnection();
-        PreparedStatement stat = connection.prepareStatement("SELECT * FROM history WHERE id_exo = ?");
+        PreparedStatement stat = connection.prepareStatement("SELECT * FROM history WHERE id_exo = ? AND id_user= ?");
         stat.setInt(1, exoId);
+        stat.setInt(2, userId);
         ResultSet res = stat.executeQuery();
 
-
         while (res.next()) {
-            id = exoId;
-            int weight = res.getInt(1);
-            Date date = res.getDate(2);
+            int weight = res.getInt(3);
+            Date date = res.getTimestamp(4);
+            System.out.println(date+" "+weight);
             history.put(date,weight);
         }
         connection.close();
-        if(id == 0){
-            return null;
-        }else {
-            return history;
-        }
+        return history;
+
     }
 
 
@@ -128,17 +125,18 @@ public class ExerciceRepository {
         connection.close();
     }
 
-    public void addWeightInHistory(int exoId, int weight,Date date) throws SQLException {
+    public void addWeightInHistory(int exoId,int userId, int weight,Date date) throws SQLException {
         Connection connection = this.pool.getConnection();
-        PreparedStatement stat = connection.prepareStatement("INSERT INTO  history (`id_exo`,`weight`, `date`) VALUES (?,?,?)");
+        PreparedStatement stat = connection.prepareStatement("INSERT INTO  history (`id_exo`,`id_user`,`weight`, `date`) VALUES (?,?,?,?)");
         stat.setInt(1,exoId);
-        stat.setInt(2, weight);
-        stat.setTimestamp(3, new java.sql.Timestamp(date.getTime()));
+        stat.setInt(2,userId);
+        stat.setInt(3, weight);
+        stat.setTimestamp(4, new java.sql.Timestamp(date.getTime()));
         stat.executeUpdate();
         connection.close();
     }
 
-    public Collection<Exercice> getAllExoFromList() throws SQLException {
+    public List<Exercice> getAllExoFromList() throws SQLException {
         List<Exercice> exercices = new ArrayList<>();
 
         Connection connection = this.pool.getConnection();

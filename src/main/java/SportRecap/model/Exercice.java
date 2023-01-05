@@ -43,6 +43,16 @@ public class Exercice {
         this.history = history;
     }
 
+    public Exercice(int id, String name, String categorie, String muscle, String description, Map<Date, Integer> history, int currentWeight) {
+        this.id = id;
+        this.name = name;
+        this.categorie = categorie;
+        this.muscle = muscle;
+        this.description = description;
+        this.history = history;
+        this.currentWeight= currentWeight;
+    }
+
     @Override
     public String toString() {
         return "Exercice{" +

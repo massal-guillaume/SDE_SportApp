@@ -16,7 +16,7 @@ public class JWTUtil {
     //MYSQL
     public static final String JDBC_URL ="jdbc:mysql://localhost:3306/sde?autoReconnect=true&useSSL=false";
     public static final String JDBC_USERNAME="root";
-    public static final String JDBC_PASSWORD="A2000091223";
+    public static final String JDBC_PASSWORD="root";
 
     //API
     public static final String API_USERNAME = "sportrecap";

@@ -1,0 +1,58 @@
+<div *ngIf="displayTable">
+<div>
+  <h2>Here is the list of your saved Exercises</h2>
+    <div class="form-group">
+      <label for="exampleFormControlSelect1">Exercise category:</label>
+      <select class="form-control" id="exampleFormControlSelect1" [(ngModel)]="selectedCategorie" name="categorie" required>
+        <option [defaultSelected]=true [value]="default" >{{default}}</option>
+        <option *ngFor="let c of categorie" [value]="c" >{{ c }}</option>
+      </select>
+    </div>
+</div>
+<div class="d-flex p-3 bg-secondary text-white">
+<div class="p-2 bg-info" *ngIf="exercice">
+    <table class="table table-dark" *ngIf="selectedCategorie ==='ALL'">
+        <tr>
+          <th>Name</th><th>Category</th><th>Current Weight</th><th>Description</th><th>Evolution</th><th>Save new Weight</th>       
+        </tr>
+        <tr *ngFor="let p of exercice" >
+        <td>{{p.name}}</td>
+        <td>{{p.categorie}}</td>
+        <td>{{p.currentWeight}} kg</td>
+        <td><button type="button" (click)="detail(p)" class="btn btn-info">Info</button></td>
+        <td><button type="button" (click)="graph(p)" class="btn btn-info">Evolution</button></td>
+        <td>
+          <button type="button" (click)="save(p,weight)" class="btn btn-info">Save Weight</button></td>
+        </tr>
+    </table>
+    <table class="table table-dark" *ngIf="selectedCategorie !=='ALL'" >
+      <tr>
+        <th>Name</th><th>Category</th><th>Current Weight</th><th>Description</th><th>Evolution</th><th>Save new Weight</th>       
+      </tr>
+      <tr *ngFor="let p of exercice" >
+      <ng-container *ngIf="p.categorie ===selectedCategorie">
+      <td>{{p.name}}</td>
+      <td>{{p.categorie}}</td>
+      <td>{{p.currentWeight}} kg</td>
+      <td><button type="button" (click)="detail(p)" class="btn btn-info">Info</button></td>
+      <td><button type="button" (click)="graph(p)" class="btn btn-info">Evolution</button></td>
+      <td>
+        <button type="button" (click)="save(p,weight)" class="btn btn-info">Save Weight</button></td>
+      </ng-container>
+      </tr>
+  </table>
+  </div>
+  <div class="p-2 bg-info">
+    <h3>To update the Weight of one of your exercice : </h3>
+    <h5>Indicate the weight here and click on the "Save Weight" button of the exercise</h5>
+    <div class="form-outline">
+      <input type="number" min="0" id="typeNumber" [(ngModel)]="weight" class="form-control" />
+    <div  *ngIf="showDetail">
+      <p *ngFor="let recipient of detailexo.history | keyvalue"> {{recipient.key}} --> {{recipient.value}}</p>
+      <apx-chart [series]="series" [chart]="chart" [title]="title" [xaxis]="xaxis"> </apx-chart>
+    </div>
+  </div>
+  </div> 
+  </div>
+</div>
+<h2 *ngIf="DontdisplayTable">You don't have any exercise in your list yet!</h2>

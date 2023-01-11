@@ -1,0 +1,45 @@
+<div class="container" *ngIf="exerciceListed">
+  <h3>This is the list of exercises avalaible right now on the app</h3>
+  <h5>Click to add them to your list</h5>
+  <div class="form-group">
+    <label for="exampleFormControlSelect1">Category avalaible : </label>
+    <select class="form-control" id="exampleFormControlSelect1" [(ngModel)]="selectedCategorie" name="categorie" required>
+      <option [defaultSelected]=true [value]="default" >{{default}}</option>
+      <option *ngFor="let c of categorie" [value]="c" >{{ c }}</option>
+    </select>
+  </div>
+</div>
+
+<table class="table table-dark" *ngIf="selectedCategorie ==='ALL'">
+  <tr>
+    <th>Name</th><th>Category</th><th>Muscle</th><th>Description</th><th>Add</th>       
+  </tr>
+  <tr *ngFor="let p of exerciceListed" >
+  <td>{{p.name}}</td>
+  <td>{{p.categorie}}</td>
+  <td>{{p.muscle}}</td>
+  <td><button type="button" (click)="detail(p)" class="btn btn-info">Info</button></td>
+  <td><button type="button" (click)="add(p)" class="btn btn-info">Add</button></td>
+  </tr>
+</table>
+<table class="table table-dark" *ngIf="selectedCategorie !=='ALL'" >
+<tr>
+  <th>Name</th><th>Category</th><th>Muscle</th><th>Description</th><th>Add</th>     
+</tr>
+<tr *ngFor="let p of exerciceListed" >
+<ng-container *ngIf="p.categorie ===selectedCategorie">
+<td>{{p.name}}</td>
+<td>{{p.categorie}}</td>
+<td>{{p.muscle}}</td>
+<td><button type="button" (click)="detail(p)" class="btn btn-info">Info</button></td>
+<td><button type="button" (click)="add(p)" class="btn btn-info">Add</button></td>
+</ng-container>
+</tr>
+</table>
+<div *ngIf="this.detailexo!=null">
+</div>
+
+  
+
+
+

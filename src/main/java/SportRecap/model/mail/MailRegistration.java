@@ -6,7 +6,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 public class MailRegistration implements Mail {
 
-        private JavaMailSender mailSender;
+        private final JavaMailSender mailSender;
         @Autowired
         public  MailRegistration(JavaMailSender mailSender) {
             this.mailSender = mailSender;
@@ -15,11 +15,11 @@ public class MailRegistration implements Mail {
         @Override
         public void sendEmail(String toEmail,String url,String token){
 
-            String body = "Bonjour,\n" +
+            String body = "Hello,\n" +
                     "\n" +
-                    "Vous venez de vous inscrire sur l'application Sport Recap.\n" +
+                    "You have just registered on the Sport Recap application.\n" +
                     "\n" +
-                    "Nous vous souhaitons la bienvenue ! Veuillez cliquer sur le lien ci-dessous pour valider votre compte."+"\n"+"\n"+url+ "/confirmation?token="+token;
+                    "Please click on the link below to validate your account."+"\n"+"\n"+url+ "/confirmation?token="+token;
 
 
 

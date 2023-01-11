@@ -6,8 +6,9 @@ import SportRecap.service.AccountService;
 import SportRecap.service.EmailSenderService;
 import SportRecap.service.ExerciceService;
 import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Autowired;;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class SportController {
     private final EmailSenderService emailSenderService;
 
     @Autowired
-    public SportController(AccountService accountService,ExerciceService exerciceService,EmailSenderService emailSenderService,JavaMailSender javaMailSender) throws SQLException, JSONException, IOException {
+    public SportController(AccountService accountService,ExerciceService exerciceService,EmailSenderService emailSenderService,JavaMailSender javaMailSender) {
         this.accountService = accountService;
         this.exerciceService = exerciceService;
         this.emailSenderService = emailSenderService;
@@ -54,13 +55,14 @@ public class SportController {
     }
 
     @PostMapping(path="/register")
-    public String saveUser(@RequestBody UserModel usermodel, final HttpServletRequest request) throws Exception{
+    public ResponseEntity saveUser(@RequestBody UserModel usermodel, final HttpServletRequest request) throws Exception{
         User user = this.accountService.addNewUser(usermodel);
         if(user != null){
             this.emailSenderService.sendMail(user,this.accountService.createVerifToken(user).getToken(),this.getAppUrl(request),"registration",this.javaMailSender);
-            return user.getEmail()+"\n"+user.getUsername();
+            UserResponseModel userRegistered = new UserResponseModel(user.getEmail(),user.getUsername());
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(userRegistered);
             }else{
-            return "Username or email already used";
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Username or email already used\";");
             }
     }
     @GetMapping("/confirmation")
@@ -71,19 +73,20 @@ public class SportController {
     }
 
     @GetMapping("/reconfirmation")
-    public String resendConfirmation(@RequestParam("email") String email, HttpServletRequest request) throws SQLException {
+    public ResponseEntity resendConfirmation(@RequestParam("email") String email, HttpServletRequest request) throws SQLException {
         User user = this.accountService.findUserbyEmail(email);
-        if(user==null) return  "Impossible to find your email, are you register ?";
+        if(user==null)  return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("Impossible to find your email, are you register ?");
         if(!user.isAccountactivated()) {
             VerificationToken token = this.accountService.getVerifTokenfromUser(user.getId());
             if(token != null){
                this.accountService.deleteVerifToken(token);
             }
-            this.emailSenderService.sendMail(user,this.accountService.createPasswordToken(user).getToken(),this.getAppUrl(request),"registration",this.javaMailSender);
+            this.emailSenderService.sendMail(user,this.accountService.createVerifToken(user).getToken(),this.getAppUrl(request),"registration",this.javaMailSender);
+            UserResponseModel userR = new UserResponseModel(user.getEmail(),user.getUsername());
+            return ResponseEntity.status(HttpStatus.OK).body(userR);
         }else {
-            return "Your account is already confirmed";
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("Your account is already confirmed");
         }
-        return "An email have been send to confirm your account";
     }
 
 
@@ -138,8 +141,7 @@ public class SportController {
             this.exerciceService.addNewCharge(nws.getId(),user.getId(),nws.getWeight());
             return null;
         }catch (Exception e){
-            throw e;
-            //return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("An error as occured, pleas try again");
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("An error as occured, pleas try again");
         }
     }
 

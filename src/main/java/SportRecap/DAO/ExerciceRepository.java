@@ -107,7 +107,6 @@ public class ExerciceRepository {
         while (res.next()) {
             int weight = res.getInt(3);
             Date date = res.getTimestamp(4);
-            System.out.println(date+" "+weight);
             history.put(date,weight);
         }
         connection.close();
@@ -163,7 +162,7 @@ public class ExerciceRepository {
         PreparedStatement stat = connection.prepareStatement("SELECT * FROM category");
         ResultSet res = stat.executeQuery();
 
-        while (res.next()) {;
+        while (res.next()) {
             category.add(res.getString(2));
         }
         connection.close();
@@ -177,7 +176,7 @@ public class ExerciceRepository {
         stat.setInt(2,id);
         ResultSet res = stat.executeQuery();
 
-        while (res.next()) {;
+        if (res.next()) {
             connection.close();
             return true;
         }

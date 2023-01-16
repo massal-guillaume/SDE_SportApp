@@ -24,7 +24,7 @@ Response :
 }
 ## LOGIN 
 
-Post : /login 
+Post : /login
 {
   "username" : "example, 
   "password" : "1234"
@@ -39,10 +39,7 @@ Response :
 
 ## RECONFIRMATION
 
-Post : /reconfirmation
-{
-  "email"= "example@gmail.com"
-}
+Post : /reconfirmation?email="example@gmail.com"
 
 Response : 
 {
@@ -52,13 +49,9 @@ Response :
 
 ## /resetpasswordRequest 
 
-Get /resetpasswordRequest
-{
-    "email"= "example@gmail.com"
-}
+Get /resetpasswordRequest?email="example@gmail.com"
 
 Response 
-
 {
   "An Email have been send on your mailbox with your new password"
 }
@@ -88,10 +81,8 @@ Response :
 
 ## Save EXO 
 
-POST /save_exo
-{
-  "id"=3
-}
+POST /save_exo?id=3
+
 
 ## EXERCICE
 
